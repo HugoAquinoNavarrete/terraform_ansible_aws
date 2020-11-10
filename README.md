@@ -48,7 +48,7 @@ Una vez el script se ejecuta generará un mensaje parecido a esto:
 
 ## 7. Una vez ejecutado el script, se creará un archivo que contiene el inventario `ansible_inventario.txt`, ve su contenido usando el comando `cat ansible_inventario.txt`
 
-## 8. Ejecutemos un Playbook para establecer un `ping` de la siguiente manera `ansible-playbook -i ansible_inventario.txt playbooks/ping.yml --private-key=key`. La ejecución se hará tantas veces como líneas existan en el archivo del inventario, a la pregunta `Are you sure you want to continue connecting (yes/no/[fingerprint])?:` contesta `yes` una vez aparezca `ok` teclea `Control-C` para volver a ejecutar el script a fin de que se haga el mismo proceso para el siguiente equipo.
+## 8. Ejecutemos un Playbook para establecer un `ping` de la siguiente manera `ansible-playbook -i ansible_inventario.txt playbooks/ping.yml --private-key=key`. La ejecución se hará tantas veces como líneas existan en el archivo del inventario, a la pregunta `Are you sure you want to continue connecting (yes/no/[fingerprint])?:` contesta `yes` una vez aparezca `ok` teclea `Control-C` para volver a ejecutar el script a fin de que se haga el mismo proceso para el siguiente equipo (la siguiente salida es de la ejecución para un solo equipo)
    ```bash
    PLAY [servers] ************************************************************************************************************************
 
@@ -62,7 +62,73 @@ Una vez el script se ejecuta generará un mensaje parecido a esto:
    ec2-ip-instancia-creada.region.compute.amazonaws.com : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
    ```
 
-## 9. Ejecutemos un Playbook para instalar `Docker` y `Python` en la lista de equipos que tenemos del inventario `ansible-playbook -i ansible_inventario.txt playbooks/docker_python_instalacion.yml ubuntu@u --private-key=key`. En pantalla se irá mostrando el avance de la instalación de los componentes.
+## 9. Ejecutemos un Playbook para instalar `Docker` y `Python` en la lista de equipos que tenemos del inventario `ansible-playbook -i ansible_inventario.txt playbooks/docker_python_instalacion.yml --private-key=key`. En pantalla se irá mostrando el avance de la instalación de los componentes (la siguiente salida es de la ejecución para un solo equipo)
+   ```bash
+   PLAY [Instalar Docker] ******************************************************************************************************************************************************************
+
+   TASK [Gathering Facts] ******************************************************************************************************************************************************************
+   ok: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Actualizar paquetes apt] **********************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Instalar paquetes para Docker] ****************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Agrega Docker GPG apt Key] ********************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Salva el release de Ubuntu en una variable] ***************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Agrega el repositorio Docker] *****************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Actualiza los paquetes apt] *******************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Instala Docker] *******************************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Prueba Docker con el contenedor hello world] **************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Muestra la salida del contenedor hello world] *************************************************************************************************************************************
+   ok: [ec2-ip-instance-created.region.compute.amazonaws.com] => {
+    "msg": "Container Output: \nHello from Docker!\nThis message shows that your installation appears to be working correctly.\n\nTo generate this message, Docker took the following ste
+ps:\n 1. The Docker client contacted the Docker daemon.\n 2. The Docker daemon pulled the \"hello-world\" image from the Docker Hub.\n    (amd64)\n 3. The Docker daemon created a new co
+ntainer from that image which runs the\n    executable that produces the output you are currently reading.\n 4. The Docker daemon streamed that output to the Docker client, which sent i
+t\n    to your terminal.\n\nTo try something more ambitious, you can run an Ubuntu container with:\n $ docker run -it ubuntu bash\n\nShare images, automate workflows, and more with a fr
+ee Docker ID:\n https://hub.docker.com/\n\nFor more examples and ideas, visit:\n https://docs.docker.com/get-started/"
+}
+
+   TASK [Create el grupo docker] ***********************************************************************************************************************************************************
+   ok: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Agrega el usuario ubuntu al grupo docker] *****************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Instala Docker Compose] ***********************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Instala Ctop] *********************************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Instala Python] *******************************************************************************************************************************************************************
+   ok: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Instala pip3] *********************************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Instala módulo Docker para Python] ************************************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   TASK [Reinicia la VM para que los cambios surgan efecto] ********************************************************************************************************************************
+   changed: [ec2-ip-instance-created.region.compute.amazonaws.com]
+
+   PLAY RECAP ******************************************************************************************************************************************************************************
+   ec2-ip-instance-created.region.compute.amazonaws.com : ok=18   changed=14   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+   ```
 
 ## 10. Para eliminar la infraestructura desplegada, ejecuta `terraform destroy` y cuando aparezca el siguiente mensaje, escribe `yes`:
    ```bash
