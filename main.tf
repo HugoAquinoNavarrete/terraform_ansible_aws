@@ -1,10 +1,8 @@
 # Script en Terraform para desplegar en AWS n instancias EC2 tipo ubuntu 
 # con acceso a internet que permiten tráfico SSH, HTTP y HTTPS
 # que logra integrarse con Ansible al generar un archivo dinámico de inventario
-# Hugo Aquino - Copa Airlines
-# Noviembre 2020
-
-# Script desarrollado inicialmente para la versión 0.11.3, que se migra a la versión 0.15.3
+# Hugo Aquino
+# Abril 2021
 
 # Antes de ejecutar este script, ejecuta "aws configure" para poder habilitar
 # AWS Access Key ID
@@ -45,7 +43,6 @@ provider "aws" {
 # Generemos una llave
 resource "aws_key_pair" "key" {
   key_name   = "key"
-  #public_key = "${file("key.pub")}" # Línea usada en versión 0.11.3
   public_key = file("key.pub")
 }
 
@@ -62,7 +59,6 @@ resource "aws_vpc" "vpc" {
 
 # Crea un gateway de Internet
 resource "aws_internet_gateway" "internet-gateway" {
-  #vpc_id = "${aws_vpc.vpc.id}" # Línea usada en versión 0.11.3
   vpc_id = aws_vpc.vpc.id
  
   tags = {
@@ -72,7 +68,6 @@ resource "aws_internet_gateway" "internet-gateway" {
 
 # Crea las subredes internas
 resource "aws_subnet" "subnet" {
-  #vpc_id            = "${aws_vpc.vpc.id}" # Línea usada en versión 0.11.3
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-west-2a"
@@ -84,12 +79,10 @@ resource "aws_subnet" "subnet" {
 
 # Tabla de ruteo para internet
 resource "aws_route_table" "route-table" {
-  #vpc_id = "${aws_vpc.vpc.id}" # Línea usada en versión 0.11.3
   vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    #gateway_id = "${aws_internet_gateway.internet-gateway.id}" # Línea usada en versión 0.11.3
     gateway_id = aws_internet_gateway.internet-gateway.id
   }
 
@@ -100,9 +93,7 @@ resource "aws_route_table" "route-table" {
 
 # Asocia la tabla de ruteo a la subred
 resource "aws_route_table_association" "subnet-asociacion" {
-  #subnet_id      = "${aws_subnet.subnet.id}" # Línea usada en versión 0.11.3
   subnet_id      = aws_subnet.subnet.id
-  #route_table_id = "${aws_route_table.route-table.id}" # Línea usada en versión 0.11.3
   route_table_id = aws_route_table.route-table.id
 }
 
@@ -110,7 +101,6 @@ resource "aws_route_table_association" "subnet-asociacion" {
 resource "aws_security_group" "security-group" {
   name        = "${var.nombre_instancia}-security-group" 
   description = "Permite trafico entrante"
-  #vpc_id      = "${aws_vpc.vpc.id}" # Línea usada en versión 0.11.3
   vpc_id      = aws_vpc.vpc.id
 
   # Permite trafico SSH
@@ -131,7 +121,7 @@ resource "aws_security_group" "security-group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Permite trafico HHTPS
+  # Permite trafico HTTPS
   ingress {
     description = "HTTPS"
     from_port   = 443
@@ -155,20 +145,16 @@ resource "aws_security_group" "security-group" {
 
 # Crea n instancias Ubuntu
 resource "aws_instance" "aws" {
-  #count                       = "${var.cantidad_instancias}" # Línea usada en versión 0.11.3
   count                       = var.cantidad_instancias
-  ami                         = "ami-0d1cd67c26f5fca19"
-  instance_type               = "t2.micro"
-  #key_name                    = "${aws_key_pair.key.key_name}" # Línea usada en versión 0.11.3
+  ami                         = "ami-0d1cd67c26f5fca19" #para una imagen nueva ami-0d1cd67c26f5fca19 para jenkins ami-0a8c16ff18611b4f7
+  instance_type               = "t2.micro" #para pruebas t2.micro, para labs jenkins t2.medium
   key_name                    = aws_key_pair.key.key_name
-  #vpc_security_group_ids      = ["${aws_security_group.security-group.id}"] # Línea usada en versión 0.11.3
   vpc_security_group_ids      = [aws_security_group.security-group.id]
-  #subnet_id                   = "${aws_subnet.subnet.id}" # Línea usada en versión 0.11.3
   subnet_id                   = aws_subnet.subnet.id
   associate_public_ip_address = "true"
 
   root_block_device {
-    volume_size           = "10"
+    volume_size           = "10" #para pruebas 10, para labs jenkins 20
     volume_type           = "standard"
     delete_on_termination = "true"
   }
