@@ -147,7 +147,7 @@ resource "aws_security_group" "security-group" {
 resource "aws_instance" "aws" {
   count                       = var.cantidad_instancias
   ami                         = "ami-0d1cd67c26f5fca19" #para una imagen nueva ami-0d1cd67c26f5fca19 para jenkins ami-0a8c16ff18611b4f7
-  instance_type               = "t2.micro" #para pruebas t2.micro, para labs jenkins t2.medium
+  instance_type               = "t2.medium" #para pruebas t2.micro, para labs jenkins t2.medium
   key_name                    = aws_key_pair.key.key_name
   vpc_security_group_ids      = [aws_security_group.security-group.id]
   subnet_id                   = aws_subnet.subnet.id
