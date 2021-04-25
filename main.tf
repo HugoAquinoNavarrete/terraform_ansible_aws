@@ -154,7 +154,7 @@ resource "aws_instance" "aws" {
   associate_public_ip_address = "true"
 
   root_block_device {
-    volume_size           = "10" #para pruebas 10, para labs jenkins 20
+    volume_size           = "20" #para pruebas 10, para labs jenkins 20
     volume_type           = "standard"
     delete_on_termination = "true"
   }
