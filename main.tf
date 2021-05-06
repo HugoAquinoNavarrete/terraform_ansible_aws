@@ -2,7 +2,7 @@
 # con acceso a internet que permiten tráfico SSH, HTTP y HTTPS
 # que logra integrarse con Ansible al generar un archivo dinámico de inventario
 # Hugo Aquino
-# Abril 2021
+# Mayo 2021
 
 # Antes de ejecutar este script, ejecuta "aws configure" para poder habilitar
 # AWS Access Key ID
@@ -10,16 +10,13 @@
 # Default region name
 # Default output format (YAML)
 
-# Después genera una llave ejecutando
-# "ssh-keygen"
-# La llave se llama key.pub. Sálvalas en el directorio donde este este script <ruta_completa>/key
-# Deja en blanco "passphrase"
+# El script creará la llave privada y cambiará el permiso a 400 al archivo de la llave
 
 # Para conectarte con la VM una vez creada
 # ssh -v -l ubuntu -i key <ip_publica_instancia_creada> 
 
 # Para correr este script desde la consola:
-# terraform apply -var "nombre_instancia=<nombre_recursos>" -var "cantidad_instancias=<n>"
+# terraform apply -var "nombre_instancia=<nombre_recursos>" -var "cantidad_instancias=<n> -var "subred=<subred>" -auto-approve
 
 # Para ajustar la cantidad de VMs a crear hay que cambiar el valor de la siguiente variable a la cantidad "default = n"
 
@@ -34,21 +31,45 @@ variable nombre_instancia {
   default = "prueba"
 }
 
+# Para ajustar la subred hay que cambiar el valor de la siguiente variable al nombre que desees "default = <subred>"
+
+variable subred {
+  default = 10
+}
+
 # Haremos despliegue en AWS
 provider "aws" {
   profile = "default"
   region  = "us-west-2"
 }
 
-# Generemos una llave
-resource "aws_key_pair" "key" {
-  key_name   = "key"
-  public_key = file("key.pub")
+# Veamos la creación automática de la llave privada
+variable "key_name" {
+   default = "key_lab"
+}
+
+resource "tls_private_key" "private_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+
+  provisioner local-exec { 
+    command = "echo '${self.private_key_pem}' > ./key"
+  }
+
+  provisioner "local-exec" {
+    command = "chmod 600 ./key"
+  }
+
+}
+
+resource "aws_key_pair" "generated_key" {
+  key_name   = var.key_name
+  public_key = tls_private_key.private_key.public_key_openssh
 }
 
 # Crea la VPC
 resource "aws_vpc" "vpc" {
-  cidr_block           = "10.0.1.0/24"
+  cidr_block           = "10.0.${var.subred}.0/24"
   enable_dns_hostnames = true
   enable_dns_support   = true
  
@@ -69,7 +90,7 @@ resource "aws_internet_gateway" "internet-gateway" {
 # Crea las subredes internas
 resource "aws_subnet" "subnet" {
   vpc_id            = aws_vpc.vpc.id
-  cidr_block        = "10.0.1.0/24"
+  cidr_block        = "10.0.${var.subred}.0/24"
   availability_zone = "us-west-2a"
 
   tags = {
@@ -157,7 +178,7 @@ resource "aws_instance" "aws" {
   count                       = var.cantidad_instancias
   ami                         = "ami-0a8c16ff18611b4f7" #para una imagen nueva ami-0d1cd67c26f5fca19 para jenkins ami-0a8c16ff18611b4f7
   instance_type               = "t2.medium" #para pruebas t2.micro, para labs jenkins t2.medium
-  key_name                    = aws_key_pair.key.key_name
+  key_name                    = aws_key_pair.generated_key.key_name
   vpc_security_group_ids      = [aws_security_group.security-group.id]
   subnet_id                   = aws_subnet.subnet.id
   associate_public_ip_address = "true"

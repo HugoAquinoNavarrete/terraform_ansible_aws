@@ -9,12 +9,8 @@ Antes de ejecutar este script, ejecuta `aws configure` para habilitar
    - Default region name 
    - Default output format (json,yaml,yaml-stream,text,table)
 
-## 2. Genera un par de llaves rsa pública/privada
-   ```bash 
-   ssh-keygen
-   ```
-
-   Sálvala en el directorio donde correras este script `<ruta_absoluta>/key`, deja vacío `passphrase`. La llave debe llamarse `key.pub`, sálvala en el directorio donde correras este script `<ruta_absoluta>/key`, deja vacío `passphrase`
+## 2. El script generará la llave privada
+El archivo se llamará `key`
 
 ## 3. Conexión por SSH a la máquina virtual 
    ```bash
@@ -31,7 +27,7 @@ Antes de ejecutar este script, ejecuta `aws configure` para habilitar
 
 ## 5. Si es la primera vez que corres el script, ejecuta `terraform init`
 
-## 6. Para ejecutar el script `terraform apply -var "nombre_instancia=<nombre_recursos>" -var "cantidad_instancias=<n>"` cuando el siguiente mensaje aparezca, escribe `yes`:
+## 6. Para ejecutar el script `terraform apply -var "nombre_instancia=<nombre_recursos>" -var "cantidad_instancias=<n>" -var "subred=<subred>"` cuando el siguiente mensaje aparezca, escribe `yes`:
    ```bash
    Do you want to perform these actions?
      Terraform will perform the actions described above.
