@@ -34,7 +34,7 @@ variable nombre_instancia {
 # Para ajustar la subred hay que cambiar el valor de la siguiente variable al nombre que desees "default = <subred>"
 
 variable subred {
-  default = 1
+  default = 100
 }
 
 # Haremos despliegue en AWS
@@ -68,15 +68,15 @@ resource "aws_key_pair" "generated_key" {
 }
 
 # Crea la VPC
-#resource "aws_vpc" "vpc" {
-#  cidr_block           = "10.0.${var.subred}.0/24"
-#  enable_dns_hostnames = true
-#  enable_dns_support   = true
+resource "aws_vpc" "vpc" {
+  cidr_block           = "10.0.${var.subred}.0/24"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
  
-#  tags = {
-#    Name = "${var.nombre_instancia}-vpc"
-#  }
-#}
+  tags = {
+    Name = "${var.nombre_instancia}-vpc"
+  }
+}
 
 # Crea un gateway de Internet
 resource "aws_internet_gateway" "internet-gateway" {
