@@ -34,7 +34,7 @@ variable nombre_instancia {
 # Para ajustar la subred hay que cambiar el valor de la siguiente variable al nombre que desees "default = <subred>"
 
 variable subred {
-  default = 10
+  default = 1
 }
 
 # Haremos despliegue en AWS
@@ -53,11 +53,11 @@ resource "tls_private_key" "private_key" {
   rsa_bits  = 4096
 
   provisioner local-exec { 
-    command = "echo '${self.private_key_pem}' > ./key"
+    command = "echo '${self.private_key_pem}' > ./key_lab"
   }
 
   provisioner "local-exec" {
-    command = "chmod 600 ./key"
+    command = "chmod 600 ./key_lab"
   }
 
 }
@@ -68,15 +68,15 @@ resource "aws_key_pair" "generated_key" {
 }
 
 # Crea la VPC
-resource "aws_vpc" "vpc" {
-  cidr_block           = "10.0.${var.subred}.0/24"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
+#resource "aws_vpc" "vpc" {
+#  cidr_block           = "10.0.${var.subred}.0/24"
+#  enable_dns_hostnames = true
+#  enable_dns_support   = true
  
-  tags = {
-    Name = "${var.nombre_instancia}-vpc"
-  }
-}
+#  tags = {
+#    Name = "${var.nombre_instancia}-vpc"
+#  }
+#}
 
 # Crea un gateway de Internet
 resource "aws_internet_gateway" "internet-gateway" {
@@ -157,6 +157,15 @@ resource "aws_security_group" "security-group" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Permite acceso por ICMP (ping)
+  ingress {
+    description = "ICMP"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "icmp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
